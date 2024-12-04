@@ -10,8 +10,8 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/d
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Avatar Fighting Simulator",
-    SubTitle = "Made By Nozer Hub | Arceus X ",
+    Title = " Avatar Fighting Simulator       ",
+    SubTitle = "        By Nozer Hub",
     TabWidth = 120,
     Size = UDim2.fromOffset(500, 350),
     Acrylic = false,
@@ -139,6 +139,8 @@ Fluent:Notify({
 })
 
 SaveManager:LoadAutoloadConfig()
+
+local AvatarSection = Tabs.Summon:AddSection("Avatar")
 
 local Dropdown = Tabs.Summon:AddDropdown("SummonDropdown", {
     Title = "Select Avatar",
@@ -529,3 +531,59 @@ Tabs.Teleport:AddButton({
         end
     end
 })
+
+local EggsSection = Tabs.Summon:AddSection("Eggs")
+
+local AreaDropdown = Tabs.Summon:AddDropdown("AreaDropdown", {
+    Title = "Select Area",
+    Values = {"AREA 1", "AREA 2", "AREA 3", "AREA 4", "AREA 5", "AREA 6", "AREA 7"},
+    Multi = false,
+    Default = "AREA 1",
+})
+
+local MethodDropdown = Tabs.Summon:AddDropdown("MethodDropdown", {
+    Title = "Select Hatch Type",
+    Values = {"Open 1", "Open 3", "Open Max"},
+    Multi = false,
+    Default = "Open 1",
+})
+
+local Toggle = Tabs.Summon:AddToggle("AutoSummonToggle", {
+    Title = "Auto Hatch Selected",
+    Default = false
+})
+
+Toggle:OnChanged(function()
+    if Toggle.Value then
+        -- Enquanto o Toggle estiver ativado, executar a função repetidamente
+        task.spawn(function()
+            while Toggle.Value do
+                local selectedArea = AreaDropdown.Value
+                local selectedMethod = MethodDropdown.Value
+
+                -- Escolhe o tipo de Hatch com base no método selecionado
+                local hatchType
+                if selectedMethod == "Open 1" then
+                    hatchType = "E"  -- Método Open 1
+                elseif selectedMethod == "Open 3" then
+                    hatchType = "R"  -- Método Open 3
+                elseif selectedMethod == "Open Max" then
+                    hatchType = "F"  -- Método Open Max
+                end
+
+                -- Envia o comando para realizar o Hatch na área e com o método selecionado
+                local args = {
+                    [1] = selectedArea,
+                    [2] = hatchType
+                }
+
+                -- Dispara o evento do Hatch com os argumentos definidos
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("HatchEgg"):FireServer(unpack(args))
+
+                wait(0.1)  -- Espera 0.1 segundos antes de realizar outra invocação
+            end
+        end)
+    end
+end)
+
+Toggle:SetValue(false)  -- Deixa o toggle inicialmente desativado
